@@ -4,11 +4,16 @@
   "description": "Control Sonarr and Radarr via a Telegram bot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.json",
+    "start": "node index.js"
   },
   "author": "Tim Headley",
   "license": "ISC",
   "dependencies": {
     "fastify": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^4.7.4"
   }
 }
