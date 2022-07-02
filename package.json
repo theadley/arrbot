@@ -1,0 +1,14 @@
+{
+  "name": "arrbot",
+  "version": "1.0.0",
+  "description": "Control Sonarr and Radarr via a Telegram bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tim Headley",
+  "license": "ISC",
+  "dependencies": {
+    "fastify": "^4.2.0"
+  }
+}
