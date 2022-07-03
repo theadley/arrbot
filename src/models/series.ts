@@ -117,5 +117,5 @@ export interface TelegramCalendarResponseLine {
   airDate: string;
   overview: string;
   hasFile: boolean;
-  bannerUrl: string;
+  seriesType: string;
 }

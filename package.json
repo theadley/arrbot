@@ -11,7 +11,6 @@
   "author": "Tim Headley",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^4.2.0",
     "node-fetch": "^3.2.6",
     "telegraf": "^4.8.5"
   },
