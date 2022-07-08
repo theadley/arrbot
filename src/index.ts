@@ -25,10 +25,12 @@ if (!API_KEY_TELEGRAM) {
 const bot = new Telegraf(API_KEY_TELEGRAM);
 bot.use(Telegraf.log());
 
+bot.telegram.sendMessage('791306687', "Oi! I'm alive. Type /help!");
+
 bot.start((ctx) => ctx.reply('Welcome!\nTry the /help command for more info.'))
 
 bot.help(async (ctx) => {
-  return await ctx.reply('Custom buttons keyboard', Markup
+  return await ctx.reply('Pick an option 👇', Markup
     .keyboard([
       ['🔍 Search', '📅 Calendar'], // Row1 with 2 buttons
       ['💽 Space', '📞 Feedback'], // Row2 with 2 buttons
@@ -47,6 +49,8 @@ bot.hears('📅 Calendar', async (ctx) => cal(ctx, URL_SONARR, API_KEY_SONARR))
 
 bot.command('space', ctx => diskspace(ctx, URL_SONARR, API_KEY_SONARR))
 bot.hears('💽 Space', ctx => diskspace(ctx, URL_SONARR, API_KEY_SONARR))
+
+
 
 bot.launch()
 

@@ -1,9 +1,15 @@
 import fetch from 'node-fetch';
 import { CalendarEntry, TelegramCalendarResponseLine } from '../models/series.js';
 
+const controller = new AbortController()
+const signal = controller.signal
+setTimeout(() => { 
+  controller.abort()
+}, 3000)
+
 //@ts-ignore
 export const cal = async (ctx, URL_SONARR: string, API_KEY_SONARR: string) => {
-  await fetch(`${URL_SONARR}/api/calendar?apikey=${API_KEY_SONARR}`)
+  await fetch(`${URL_SONARR}/api/calendar?apikey=${API_KEY_SONARR}`, { signal })
     .then(res => {
       res.json()
         .then(json => {
