@@ -118,4 +118,6 @@ export interface TelegramCalendarResponseLine {
   overview: string;
   hasFile: boolean;
   seriesType: string;
+  quality: string;
+  genres: string[];
 }

@@ -21,14 +21,14 @@ function formatBytes(bytes: number, decimals = 2) {
 
 //@ts-ignore
 export const diskspace = async (ctx, URL_SONARR: string, API_KEY_SONARR: string) => {
-  await fetch(`${URL_SONARR}/api/diskspace?apikey=${API_KEY_SONARR}`, {signal})
+  await fetch(`${URL_SONARR}/api/diskspace?apikey=${API_KEY_SONARR}`)
     .then(res => {
       res.json()
         .then(json => {
           const reply = (json as DiskSpace[])
           .sort((a,b) => a.path < b.path ? -1: a.path > b.path ? 1 : 0)
           .map(responseLine => `
-          💽 <b>${responseLine.path}${responseLine.label}</b> • ${Math.round((responseLine.totalSpace - responseLine.freeSpace) * 10000 / responseLine.totalSpace) / 100}% used • ${formatBytes(responseLine.freeSpace)} free
+          💽 <b>${responseLine.path}${responseLine.label}</b> • ${Math.round((responseLine.totalSpace - responseLine.freeSpace) * 10000 / responseLine.totalSpace) / 100}% used • ${formatBytes(responseLine.freeSpace)} free • ${formatBytes(responseLine.totalSpace)} total
           `).join('').replace(/ {2,}/g, '');
           ctx.replyWithHTML(reply)
         })
