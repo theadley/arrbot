@@ -29,8 +29,14 @@ export const diskspace = async (ctx, URL_SONARR: string, API_KEY_SONARR: string)
           .sort((a,b) => a.path < b.path ? -1: a.path > b.path ? 1 : 0)
           .map(responseLine => `
           💽 <b>${responseLine.path}${responseLine.label}</b> • ${Math.round((responseLine.totalSpace - responseLine.freeSpace) * 10000 / responseLine.totalSpace) / 100}% used • ${formatBytes(responseLine.freeSpace)} free • ${formatBytes(responseLine.totalSpace)} total
-          `).join('').replace(/ {2,}/g, '');
-          ctx.replyWithHTML(reply)
+          `);
+          const totalSpace = (json as DiskSpace[]).reduce((total, disk) => total + disk.totalSpace, 0);
+          const totalUsed = totalSpace - (json as DiskSpace[]).reduce((total, disk) => total + disk.freeSpace, 0);
+          reply.push(`
+            <b>TOTAL USED: ${formatBytes(totalUsed)}</b>
+          `);
+          reply.push(`<b>TOTAL SPACE: ${formatBytes(totalSpace)}</b>`);
+          ctx.replyWithHTML(reply.join('').replace(/ {2,}/g, ''))
         })
         .catch(err => ctx.reply(String(err)))
     })
