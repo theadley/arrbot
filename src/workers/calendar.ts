@@ -1,58 +1,57 @@
 import fetch from 'node-fetch';
-import { CalendarEntry, TelegramCalendarResponseLine } from '../models/series.js';
-import { mapSeries } from '../utils/mapseries.js';
+import {CalendarEntry, TelegramCalendarResponseLine} from '../models/series.js';
+import {mapSeries} from '../utils/mapseries.js';
+import {Context} from "telegraf";
 
-const controller = new AbortController()
-const signal = controller.signal
-setTimeout(() => { 
-  controller.abort()
-}, 30000)
+export const cal = async (ctx: Context, URL_SONARR: string, API_KEY_SONARR: string, isLong = false) => {
+    let URL = `${URL_SONARR}/api/v3/calendar?apikey=${API_KEY_SONARR}&unmonitored=false&includeSeries=true&includeEpisodeFile=true&includeEpisodeImages=true`;
+    if (isLong) {
+        const lastWeek = new Date();
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        URL = `${URL_SONARR}/api/v3/calendar?start=${lastWeek.toISOString().split('T')[0]}&end=${nextWeek.toISOString().split('T')[0]}&unmonitored=false&includeSeries=true&includeEpisodeFile=true&includeEpisodeImages=true&apikey=${API_KEY_SONARR}`;
+    }
+    await fetch(URL, {headers: {"Accept-Encoding": "gzip, deflate, identity"}})
+        .then(res => {
+            res.json()
+                .then(json => {
+                    const replyData = (json as CalendarEntry[])
+                        .sort((a, b) => a.airDateUtc < b.airDateUtc ? -1 : a.airDateUtc > b.airDateUtc ? 1 : 0)
+                        .map(calendarEntry => {
+                            // console.log(calendarEntry)
+                            return {
+                                seriesName: calendarEntry.series?.title ?? 'Untitled',
+                                seasonNumber: calendarEntry.seasonNumber,
+                                episodeNumber: calendarEntry.episodeNumber,
+                                airDate: calendarEntry.airDate,
+                                overview: calendarEntry.overview,
+                                hasFile: calendarEntry.hasFile,
+                                seriesType: calendarEntry.series?.seriesType ?? 'UNK',
+                                quality: calendarEntry.episodeFile?.quality ? calendarEntry.episodeFile.quality.quality.resolution + 'p' : '',
+                                genres: calendarEntry.series?.genres ?? [],
+                                image: calendarEntry.series?.images?.find(img => img.coverType === 'poster')?.remoteUrl ?? '',
+                            } as TelegramCalendarResponseLine
+                        });
 
-//@ts-ignore
-export const cal = async (ctx, URL_SONARR: string, API_KEY_SONARR: string, isLong = false) => {
-  let URL = `${URL_SONARR}/api/calendar?apikey=${API_KEY_SONARR}`;
-  if (isLong) {
-    const lastWeek = new Date();
-    lastWeek.setDate(lastWeek.getDate() - 7);
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    URL = `${URL_SONARR}/api/calendar?apikey=${API_KEY_SONARR}&start=${lastWeek.toISOString().split('T')[0]}&end=${nextWeek.toISOString().split('T')[0]}`;
-  }
-  await fetch(URL)
-    .then(res => {
-      res.json()
-        .then(json => {
-          const replyData = (json as CalendarEntry[])
-            .sort((a, b) => a.airDateUtc < b.airDateUtc ? -1 : a.airDateUtc > b.airDateUtc ? 1 : 0)
-            .map(calendarEntry => {
-            return {
-              seriesName: calendarEntry.series.title,
-              seasonNumber: calendarEntry.seasonNumber,
-              episodeNumber: calendarEntry.episodeNumber,
-              airDate: calendarEntry.airDate,
-              overview: calendarEntry.overview,
-              hasFile: calendarEntry.hasFile,
-              seriesType: calendarEntry.series.seriesType,
-              quality: calendarEntry.episodeFile?.quality ? calendarEntry.episodeFile.quality.quality.resolution + 'p': '',
-              genres: calendarEntry.series.genres
-            } as TelegramCalendarResponseLine
-          });
-
-          const reply = replyData.map(responseLine => `
-            ${responseLine.seriesType === 'standard' ? '📺': '🍙'} ${responseLine.airDate} • <i>${responseLine.hasFile ? 'Downloaded ' + (responseLine.quality.length ? '@' + responseLine.quality : '') : 'Pending'}</i>
-            <b>${responseLine.seriesName} S${responseLine.seasonNumber < 10 ? '0' : ''}${responseLine.seasonNumber}E${responseLine.episodeNumber < 10 ? '0' : ''}${responseLine.episodeNumber}</b>${responseLine.genres ? '\n<i>' + responseLine.genres.join(', ') + '</i>' : ''}${responseLine.overview ? '\n' + responseLine.overview : ''}
+                    const reply = replyData.map(responseLine => `
+            ${responseLine.seriesType === 'standard' ? '📺' : '🍙'} ${responseLine.airDate} • <i>${responseLine.hasFile ? 'Downloaded ' + (responseLine.quality.length ? '@' + responseLine.quality : '') : 'Pending'}</i>
+            <b>${responseLine.seriesName} S${responseLine.seasonNumber < 10 ? '0' : ''}${responseLine.seasonNumber}E${responseLine.episodeNumber < 10 ? '0' : ''}${responseLine.episodeNumber}</b>${responseLine.genres ? '\n<i>' + responseLine.genres.join(', ') + '</i>' : ''}${responseLine.overview ? '\n\n' + responseLine.overview : ''}
             `);
-          if (reply.join('').replace(/ {2,}/g, '').length < 4096) {
-            ctx.replyWithHTML(reply.join('').replace(/ {2,}/g, ''))
-          } else {
-            reply.push('<b>This message was too long to send in one message, sorry.</b>');
-            mapSeries(reply.map(line => line.replace(/ {2,}/g, '')), (p) => ctx.replyWithHTML(p))
-            .then(() =>
-              console.log('All done!')
-            )
-          }
+                    mapSeries(reply.map(line => line.replace(/ {2,}/g, '')), (p, i) => {
+                        if (replyData[i]?.image)
+                            ctx.replyWithPhoto(replyData[i].image, {caption: p, parse_mode: 'HTML'})
+                        else
+                            ctx.replyWithHTML(p);
+                    });
+                })
+                .catch(err => {
+                    console.error(URL, res.status);
+                    ctx.reply(String(err))
+                })
         })
-        .catch(err => ctx.reply(String(err)))
-    })
-    .catch(err => ctx.reply('😮‍💨 SIGH. I can\'t get a hold of TimTV. Probably load shedding 🙄'))
+        .catch(err => {
+            console.error(err);
+            ctx.reply('😮‍💨 SIGH. I can\'t get a hold of TimTV. Probably load shedding 🙄')
+        })
 }

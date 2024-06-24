@@ -44,8 +44,8 @@ export interface EpisodeFile {
 }
 
 export interface Image {
-  coverType: string;
-  url: string;
+  coverType: string
+  remoteUrl: string
 }
 
 export interface Season {
@@ -59,56 +59,66 @@ export interface Ratings {
 }
 
 export interface Series {
-  title: string;
-  sortTitle: string;
-  seasonCount: number;
-  status: string;
-  overview: string;
-  network: string;
-  airTime: string;
-  images: Image[];
-  seasons: Season[];
-  year: number;
-  path: string;
-  profileId: number;
-  languageProfileId: number;
-  seasonFolder: boolean;
-  monitored: boolean;
-  useSceneNumbering: boolean;
-  runtime: number;
-  tvdbId: number;
-  tvRageId: number;
-  tvMazeId: number;
-  firstAired: Date;
-  lastInfoSync: Date;
-  seriesType: string;
-  cleanTitle: string;
-  imdbId: string;
-  titleSlug: string;
-  genres: string[];
-  tags: any[];
-  added: Date;
-  ratings: Ratings;
-  qualityProfileId: number;
-  id: number;
+  title: string
+  sortTitle: string
+  status: string
+  ended: boolean
+  overview: string
+  network: string
+  airTime: string
+  images: Image[]
+  originalLanguage: Language
+  seasons: Season[]
+  year: number
+  path: string
+  qualityProfileId: number
+  seasonFolder: boolean
+  monitored: boolean
+  monitorNewItems: string
+  useSceneNumbering: boolean
+  runtime: number
+  tvdbId: number
+  tvRageId: number
+  tvMazeId: number
+  firstAired: string
+  lastAired: string
+  seriesType: string
+  cleanTitle: string
+  imdbId: string
+  titleSlug: string
+  certification: string
+  genres: string[]
+  tags: any[]
+  added: string
+  ratings: Ratings
+  languageProfileId: number
+  id: number
 }
 
 export interface CalendarEntry {
   seriesId: number;
+  tvdbId: number;
   episodeFileId: number;
   seasonNumber: number;
   episodeNumber: number;
   title: string;
   airDate: string;
   airDateUtc: Date;
+  runtime: number;
   overview: string;
   episodeFile: EpisodeFile;
   hasFile: boolean;
   monitored: boolean;
-  unverifiedSceneNumbering: boolean;
-  series: Series;
-  id: number;
+  absoluteEpisodeNumber: number;
+  sceneAbsoluteEpisodeNumber: number
+  sceneEpisodeNumber: number
+  sceneSeasonNumber: number
+  unverifiedSceneNumbering: boolean
+  series: Series
+  images: Image[]
+  id: number
 }
+
 
 export interface TelegramCalendarResponseLine {
   seriesName: string;
@@ -120,4 +130,5 @@ export interface TelegramCalendarResponseLine {
   seriesType: string;
   quality: string;
   genres: string[];
+  image: string;
 }

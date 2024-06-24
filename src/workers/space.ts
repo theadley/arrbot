@@ -1,12 +1,6 @@
 import fetch from 'node-fetch';
 import { DiskSpace } from '../models/diskspace.js';
 
-const controller = new AbortController()
-const signal = controller.signal
-setTimeout(() => { 
-  controller.abort()
-}, 3000)
-
 function formatBytes(bytes: number, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
 
@@ -21,7 +15,7 @@ function formatBytes(bytes: number, decimals = 2) {
 
 //@ts-ignore
 export const diskspace = async (ctx, URL_SONARR: string, API_KEY_SONARR: string) => {
-  await fetch(`${URL_SONARR}/api/diskspace?apikey=${API_KEY_SONARR}`)
+  await fetch(`${URL_SONARR}/api/v3/diskspace?apikey=${API_KEY_SONARR}`)
     .then(res => {
       res.json()
         .then(json => {
@@ -40,5 +34,8 @@ export const diskspace = async (ctx, URL_SONARR: string, API_KEY_SONARR: string)
         })
         .catch(err => ctx.reply(String(err)))
     })
-    .catch(err => ctx.reply('😮‍💨 SIGH. I can\'t get a hold of TimTV. Probably load shedding 🙄'))
+    .catch(err => {
+        console.error(err);
+        ctx.reply('😮‍💨 SIGH. I can\'t get a hold of TimTV. Probably load shedding 🙄')
+    })
 }
