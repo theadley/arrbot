@@ -11,6 +11,7 @@
   "author": "Tim Headley",
   "license": "ISC",
   "dependencies": {
+    "date-fns": "^3.6.0",
     "node-fetch": "^3.2.6",
     "node-fetch-retry-timeout": "^1.2.1",
     "telegraf": "^4.8.5"
